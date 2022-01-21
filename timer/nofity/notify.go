@@ -3,7 +3,8 @@ package nofity
 import (
 	"fmt"
 	"github.com/kirinlabs/HttpRequest"
-	"go_study/timer/logger"
+	"go_study/logger"
+
 	"net/http"
 	"time"
 )

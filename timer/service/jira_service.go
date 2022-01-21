@@ -3,8 +3,8 @@ package service
 import (
 	"encoding/json"
 	"github.com/andygrunwald/go-jira"
-	"go_study/timer/config"
-	"go_study/timer/logger"
+	"go_study/config"
+	"go_study/logger"
 	"io/ioutil"
 )
 

@@ -1,7 +1,7 @@
 package config
 
 import (
-	"go_study/timer/logger"
+	"go_study/logger"
 	"gopkg.in/yaml.v2"
 	"log"
 	"os"
