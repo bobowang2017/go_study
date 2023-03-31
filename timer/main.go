@@ -20,12 +20,14 @@ func IntervalRefresh() {
 		unSupportIssue *service.UnSignedSupport
 		err            error
 	)
+
 	defer func() {
 		if panicErr := recover(); panicErr != nil {
 			logger.Logger.Error(panicErr)
 		}
 	}()
-	logger.Logger.Info("开始刷新请求数据")
+
+	//logger.Logger.Info("开始刷新请求数据")
 	jiraSvc = service.NewJiraService()
 	unSupportIssue, err = jiraSvc.Refresh()
 	if err != nil {
@@ -51,14 +53,17 @@ func IntervalRefresh() {
 			delete(UnSupportCache, k)
 		}
 	}
+
 	msg := make([]string, 1)
 	for k, v := range UnSupportCache {
 		msg = append(msg, fmt.Sprintf("工单%s未响应，超时时间%d分钟", k, v*2))
 		logger.Logger.Infof("工单%s未响应，超时时间%d分钟", k, v*2)
+		fmt.Printf("\x1b[%d;%dm工单来啦工单来啦工单来啦工单来啦工单来啦工单来啦 \x1b[0m 45: 紫   32: 绿 \n", 45, 32)
 	}
 	pushPlusClient := nofity.NewPushPlusClient()
 	msgClient := nofity.Msg{
 		IMsg:    pushPlusClient,
+		Issues:  unSupportIssue.Issues,
 		MsgInfo: UnSupportCache,
 	}
 	pushPlusClient.Msg = msgClient

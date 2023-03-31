@@ -3,8 +3,10 @@ package nofity
 import (
 	"fmt"
 	"github.com/kirinlabs/HttpRequest"
+	"go_study/common"
+	"go_study/config"
 	"go_study/logger"
-
+	"go_study/service"
 	"net/http"
 	"time"
 )
@@ -16,6 +18,7 @@ type IMsg interface {
 
 type Msg struct {
 	MsgInfo map[string]int
+	Issues  []service.Issue
 	IMsg
 }
 
@@ -24,28 +27,42 @@ func (b *Msg) SendMessage() {
 		msg map[string]string
 		err error
 	)
-	msg, err = b.IMsg.GetMsgTemplate("levelA")
-	if err != nil {
-		logger.Logger.Error(err)
-		return
-	}
-	err = b.IMsg.Send(msg)
-	if err != nil {
-		logger.Logger.Error(err)
-	}
-	isSendLevelTwo := false
-	for _, v := range b.MsgInfo {
-		if v >= 5 {
-			isSendLevelTwo = true
-			break
-		}
-	}
-	if isSendLevelTwo {
-		logger.Logger.Info("启动二级通知")
-		msg, err = b.IMsg.GetMsgTemplate("levelB")
-		err = b.IMsg.Send(msg)
-		if err != nil {
-			logger.Logger.Error(err)
+
+	for _, issue := range b.Issues {
+		//issue被标记过
+		if _, ok := b.MsgInfo[issue.Key]; ok {
+			msg, err = b.IMsg.GetMsgTemplate("levelA")
+			if err != nil {
+				logger.Logger.Error(err)
+				return
+			}
+			err = b.IMsg.Send(msg)
+			if err != nil {
+				logger.Logger.Error(err)
+			}
+			isSendLevelTwo := false
+			for _, v := range b.MsgInfo {
+				if v >= 5 {
+					isSendLevelTwo = true
+					break
+				}
+			}
+			if isSendLevelTwo {
+				logger.Logger.Info("启动二级通知")
+				msg, err = b.IMsg.GetMsgTemplate("levelB")
+				err = b.IMsg.Send(msg)
+				if err != nil {
+					logger.Logger.Error(err)
+				}
+			}
+		} else {
+			maxN := len(config.Cfg.TokenList)
+			seed := common.RandomInt(0, maxN)
+			msg, err = b.IMsg.GetMsgTemplate(config.Cfg.TokenList[seed])
+			err = b.IMsg.Send(msg)
+			if err != nil {
+				logger.Logger.Error(err)
+			}
 		}
 	}
 }
@@ -63,6 +80,7 @@ type PushPlus struct {
 	SendUrl       string
 	LevelOneToken string
 	LevelTwoToken string
+	TokenList     []string
 	Msg
 }
 
@@ -72,10 +90,14 @@ func (p *PushPlus) GetMsgTemplate(levelToken string) (map[string]string, error) 
 	switch levelToken {
 	case "levelA":
 		useToken = p.LevelOneToken
+
 		content = "请及时处理工单"
 	case "levelB":
 		useToken = p.LevelTwoToken
 		content = "工单超时，请及时处理"
+	default:
+		useToken = levelToken
+		content = "请及时处理工单"
 	}
 	res := map[string]string{
 		"token":    useToken,
@@ -94,10 +116,10 @@ func (p *PushPlus) Send(msg map[string]string) error {
 		err  error
 	)
 	body := map[string]string{
-		"token":   msg["token"],
-		"title":   msg["title"],
-		"content": msg["content"],
-		//"topic":    p.Token,
+		"token":    msg["token"],
+		"title":    msg["title"],
+		"content":  msg["content"],
+		"topic":    "helloworld",
 		"template": msg["template"],
 	}
 	req = HttpRequest.NewRequest().SetTimeout(3 * time.Second).SetHeaders(
@@ -120,8 +142,8 @@ func (p *PushPlus) Send(msg map[string]string) error {
 func NewPushPlusClient() *PushPlus {
 	return &PushPlus{
 		ClientName:    "PushPlus",
-		SendUrl:       "http://pushplus.hxtrip.com/send",
-		LevelTwoToken: "4e519d615f0947239ff344832c700084",
-		LevelOneToken: "9af30949f1524e0992eb676d3207f213",
+		SendUrl:       "http://www.pushplus.plus/send",
+		LevelTwoToken: "0bca9380522d42b28dd5a91f94970483",
+		LevelOneToken: "0bca9380522d42b28dd5a91f94970483",
 	}
 }

@@ -82,3 +82,27 @@ func (c *JiraService) Refresh() (res *UnSignedSupport, err error) {
 	}
 	return res, nil
 }
+
+func (c *JiraService) Assign(key, assignUser string) error {
+	var (
+		issue      *jira.Issue
+		jiraClient *jira.Client
+		err        error
+	)
+	if jiraClient, err = c.GetJiraClient(); err != nil {
+		logger.Logger.Error(err)
+		return err
+	}
+	if issue, _, err = jiraClient.Issue.Get(key, nil); err != nil {
+		logger.Logger.Error(err)
+		return err
+	}
+	issue.Fields.Assignee = &jira.User{
+		Name: assignUser,
+	}
+	if _, _, err = jiraClient.Issue.Update(issue); err != nil {
+		logger.Logger.Error(err)
+		return err
+	}
+	return nil
+}

@@ -1,0 +1,6 @@
+JiraHostUrl: "http://jira.virtueit.net/"
+Url: "http://jira.virtueit.net/rest/servicedesk/1/servicedesk/SYSUPPORT/issuelist?asc=false&issuesPerPage=50&columnNames=customfield_10200&columnNames=issuetype&columnNames=issuekey&columnNames=priority&columnNames=status&columnNames=summary&columnNames=components&columnNames=created&columnNames=reporter&excludeLinkedToMajorIncidents=false&jql=project+%3D+SYSUPPORT+AND+assignee+is+EMPTY+AND+resolution+%3D+Unresolved+ORDER+BY+%22Time+to+resolution%22+ASC&startIndex=0&orderBy="
+AssignUrl: "http://jira.virtueit.net/secure/AjaxIssueAction.jspa?decorator=none"
+UserName: "wangxiangbo"
+Password: "1q2w3e4r!Q"
+TokenList: ["0bca9380522d42b28dd5a91f94970483", "8ec5d6475d95428ea302452cf0d6da01"]
